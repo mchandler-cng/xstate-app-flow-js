@@ -1,10 +1,10 @@
-import {Machine} from 'xstate'
+import {Machine, actions} from 'xstate'
+const {assign} = actions
 
 export const config = {
   id: 'account-setup',
   context: {
-    firstName: null,
-    lastName: null,
+    name: null,
     email: null,
     password: null,
     securityQuestion: null,
@@ -13,11 +13,20 @@ export const config = {
   },
   initial: 'introduction',
   states: {
-    introduction: {on: {NEXT: 'name'}},
-    name: {on: {NEXT: 'email'}},
-    email: {on: {NEXT: 'security'}},
-    security: {on: {NEXT: 'eligibility-number'}},
-    'eligibility-number': {},
+    introduction: {on: {NEXT: 'explanation'}},
+    explanation: {on: {BACK: 'introduction', NEXT: 'email'}},
+    email: {on: {BACK: 'explanation', NEXT: 'security'}},
+    security: {on: {BACK: 'email', NEXT: 'eligibility-number'}},
+    'eligibility-number': {on: {BACK: 'security', NEXT: 'review'}},
+    review: {on: {BACK: 'eligibility-number'}},
+  },
+  on: {
+    'NAME.CHANGE': {
+      actions: assign({name: (_, {value}) => value}),
+    },
+    'EMAIL.CHANGE': {
+      actions: assign({email: (_, {value}) => value}),
+    },
   },
 }
 
